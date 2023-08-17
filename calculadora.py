@@ -236,10 +236,10 @@ def main_deteccion_errores(expresion,ans):
     matches = re.search(patron,expresion)
 
     if matches == None:
-        existe_error = deteccion_errores(expresion,ans)
+        existe_error = deteccion_errores(expresion)
 
     while matches:
-        error = deteccion_errores(matches.group(1),ans)
+        error = deteccion_errores(matches.group(1))
         if error:
             existe_error = True
             return existe_error
