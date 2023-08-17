@@ -182,9 +182,6 @@ def resolver_parentesis(expresion, ans):
 
     return expresion
 
-
-#Eliminar simbolos fuera del syntax
-#FUNCIONA MAOMA
 def main_deteccion_errores(expresion,ans):
     '''
     ***
@@ -196,15 +193,9 @@ def main_deteccion_errores(expresion,ans):
     '''
     existe_error = False
 
+    expresion = expresion.replace("ANS",str(ans)+" ")
+
     patron = r'^CUPON\(\s*\d+(?:\s*,\s*\d+)*\)$'
-    match = re.search(patron, expresion)
-
-    if match:
-        existe_error = True
-        return existe_error
-
-
-    patron = r'[^+\-*//ANSCUPON\(\s*\d+(?:\s*,\s*\d+)*\)\(\)]'
     match = re.search(patron, expresion)
 
     if match:
@@ -212,7 +203,7 @@ def main_deteccion_errores(expresion,ans):
         return existe_error
     
 
-    patron = r'CUPON\(CUPON|CUPON\((ANS|\d+),CUPON\('
+    patron = r'CUPON\(CUPON|CUPON\((\d+),CUPON\('
     match = re.search(patron, expresion)
 
     if match:
@@ -220,13 +211,21 @@ def main_deteccion_errores(expresion,ans):
         return existe_error
 
 
-    patron = r'CUPON\(\s*(?:\d+|ANS)(?:\s*,\s*(?:\d+|ANS)?\s*)*\)'
+    patron = r'CUPON\(\s*(?:\d+)(?:\s*,\s*(?:\d+)?\s*)*\)'
     match = re.search(patron, expresion)
 
     while match:
-        expresion = expresion.replace(match.group(), "1") 
+        expresion = expresion.replace(match.group(), "1 ") 
         match = re.search(patron, expresion)
+    
 
+    patron = r'[^+\-*//()\d\s]'
+    match = re.search(patron, expresion)
+
+    if match:
+        existe_error = True
+        return existe_error
+    
 
     if error_parentesis(expresion):
         existe_error = True
@@ -254,7 +253,7 @@ def main_deteccion_errores(expresion,ans):
 
     return existe_error
 
-def deteccion_errores(expresion,ans):
+def deteccion_errores(expresion):
     '''
     ***
     * expresion : String
@@ -265,7 +264,7 @@ def deteccion_errores(expresion,ans):
     Retorna True si se detecta algún error, de lo contrario, retorna False.
     '''
     hay_error = False
-    patron = r'(\d+|ANS)?\s*(\*|//|-|\+)?\s*(\d+|ANS)?'
+    patron = r'(\d+)?\s*(\*|//|-|\+)?\s*(\d+)?'
     match = re.search(patron, expresion)
 
 
@@ -277,15 +276,15 @@ def deteccion_errores(expresion,ans):
 
         if operador == None:
             hay_error = True
-            break
+            return hay_error
 
         if num1 == None or num2 == None:
             hay_error = True
-            break
+            return hay_error
         
-        if operador == "//" and (num2 == "0" or (num2 == "ANS" and ans == 0) ):
+        if operador == "//" and num2 == "0":
             hay_error = True
-            break
+            return hay_error
         
 
         expresion = expresion.replace(match.group(), "1")
@@ -385,16 +384,29 @@ def main(arch_problemas,arch_desarrollos):
 
                     if not error_bloque:
                         error_bloque = error_linea
+                        if not error_linea:
+                            ans = desarrollo(operaciones[i],int(ans))
+                    
+                    i += 1
+
+                i = 0
+                while i < len(operaciones) and error_bloque:
+                    ans = 0
+
+                    error_linea = main_deteccion_errores(operaciones[i], ans)
 
                     if error_linea:
                         errores_list.append("Error")
 
                     else:
                         errores_list.append("Sin resolver")
-
+                    
                     i += 1
 
+                    
+
                 i = 0
+                ans = 0
                 while i < len(operaciones) and not error_bloque:
 
                     resultado = desarrollo(operaciones[i],int(ans))

@@ -1,11 +1,11 @@
 import re
 
-texto = "((3 + 1) * (500 - 34) - 30 $+ ANS - CUPON(80))"
-patron = r'/([\s\S]*?)(\bANS\b|\bCUPON\(\s*\d+(?:\s*,\s*\d+)*\)\b|\d+|\+|\-|\*|//)/g'
+texto = "((3 + 1) * (500 - 34) + ANS30 // 4)"
 
-match = re.match(patron,texto)
+patron = r'[^+\-*//()\d\s]'
+match = re.search(patron, texto)
+
 if match:
     print("Hay match")
 else:
     print("No hay match")
-
